@@ -9,7 +9,7 @@ class PostSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        fields = ('id', 'text', 'author', 'image', 'pub_date', 'group')
+        fields = '__all__'
         model = Post
 
 
@@ -17,16 +17,19 @@ class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username')
     post = serializers.SlugRelatedField(read_only=True, slug_field='id')
+    # Не нашел вас в пачке (когорта 49), если убираю поле post, pytest не
+    # проходит(
+    # без этого поля пишет что нужно установить поле post только для чтения)
 
     class Meta:
-        fields = ('post', 'author', 'id', 'text', 'created')
+        fields = '__all__'
         model = Comment
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('id', 'title', 'slug', 'description')
+        fields = '__all__'
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -38,10 +41,11 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('user', 'following')
+        fields = '__all__'
         validators = [UniqueTogetherValidator(
             queryset=Follow.objects.all(),
-            fields=('user', 'following'))]
+            fields=('user', 'following'),
+            message='Нельзя повторно подписаться')]
 
     def validate_following(self, value):
         user = self.context.get('request').user
